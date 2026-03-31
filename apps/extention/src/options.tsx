@@ -1,21 +1,13 @@
-import { useState } from "react"
-
 function IndexOptions() {
-  const [data, setData] = useState("")
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: 16
-      }}>
-      <h1>
-        Welcome to your <a href="https://www.plasmo.com">Plasmo</a> Extension!
-      </h1>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
-      <footer>Crafted by @PlasmoHQ</footer>{" "}
-    </div>
+    <main className="min-h-screen bg-[var(--color-bg)] p-6 text-[var(--color-text)]">
+      <section className="mx-auto max-w-xl rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-5">
+        <h1 className="text-lg font-semibold tracking-tight">MailPilot Settings</h1>
+        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+          Settings panel is reserved for account and personalization controls.
+        </p>
+      </section>
+    </main>
   )
 }
 

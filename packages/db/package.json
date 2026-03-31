@@ -2,10 +2,12 @@
   "name": "db",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "drizzle:migrate": "bunx drizzle-kit migrate --config=drizzle.config.ts"
+  },
   "private": true,
   "exports": {
-    ".": "./index.ts",
-    "./auth": "./utils/auth.ts"
+    ".": "./index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,9 +18,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
-    "better-auth": "^1.5.6",
+    "@supabase/supabase-js": "^2.100.1",
     "dotenv": "^17.3.1",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.8"
   }
 }

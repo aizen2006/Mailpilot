@@ -12,4 +12,10 @@ To run:
 bun run index.ts
 ```
 
+To run database migrations:
+
+```bash
+bun run drizzle:migrate
+```
+
 This project was created using `bun init` in bun v1.3.9. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

@@ -1,12 +1,12 @@
 import { ExtensionChat } from "~Components/layout/ExtensionChat"
 import { PageShell } from "~Components/layout/PageShell"
 
-function IndexPopup() {
+function SidePanel() {
   return (
-    <PageShell mode="popup">
-      <ExtensionChat mode="popup" state="ready" />
+    <PageShell mode="sidebar">
+      <ExtensionChat mode="sidebar" state="ready" />
     </PageShell>
   )
 }
 
-export default IndexPopup
+export default SidePanel
