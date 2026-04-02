@@ -11,6 +11,7 @@
     "db": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "elysia": "latest",
+    "googleapis": "^171.4.0",
     "sarvamai": "^1.1.6",
     "zod": "^4.3.6"
   },
