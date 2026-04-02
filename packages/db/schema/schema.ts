@@ -25,3 +25,12 @@ export const MessageTable = table("messages", {
     role: roleEnum("role").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 });
+
+export const UserGmailTokensTable = table("tokens",{
+    id:uuid("id").primaryKey().defaultRandom(),
+    userId:uuid("user_Id").references(() => UserTable.id ),
+    accessToken:text("access_token").notNull(),
+    refreshToken:text("refresh_token").notNull(),
+    createdAt: timestamp("created_at" , { withTimezone : true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at" , { withTimezone : true }).notNull().defaultNow()
+})

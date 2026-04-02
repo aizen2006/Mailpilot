@@ -43,6 +43,13 @@
       "when": 1774889030023,
       "tag": "0005_numerous_cerebro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775045039728,
+      "tag": "0006_next_wallflower",
+      "breakpoints": true
     }
   ]
 }
