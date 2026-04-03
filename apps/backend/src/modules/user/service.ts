@@ -21,9 +21,9 @@ export abstract class UserService {
             if(!user){
                 throw status(404,'User not found')
             }
-            return status(200,'User found successfully',user);
+            return user;
         } catch (error) {
-            throw status(500,'Error while getting user by id',error as Error)
+            throw status(500,`Error while getting user by id: ${error}`);
         }
     }
 
@@ -34,12 +34,12 @@ export abstract class UserService {
                                         .leftJoin(MessageTable,eq(ConversationTable.id,MessageTable.conversationId))
                                         .where(eq(ConversationTable.userId,userId));
             if(conversations){
-                return status(200,'Conversations found successfully',conversations);
+                return conversations;
             }else{
-                return status(404,'Conversations not found')
+                throw status(404,'Conversations not found')
             }
         } catch (error) {
-            throw status(500,'Error while getting conversations by user id',error as Error)
+            throw status(500,`Error while getting conversations by user id: ${error}`);
         }
     }
     static async getMessagesByConversationId(conversationId:string){
@@ -48,10 +48,12 @@ export abstract class UserService {
                                     .from(MessageTable)
                                     .where(eq(MessageTable.conversationId,conversationId));
             if(messages){
-                return status(200,'Messages found successfully',messages);
+                return messages;
             }else{
-                return status(404,'Messages not found')
+                throw status(404,'Messages not found')
             }
+        } catch (error) {
+            throw status(500,`Error while getting messages by conversation id: ${error}`);
         }
     }
 
