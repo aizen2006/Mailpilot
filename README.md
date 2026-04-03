@@ -1,159 +1,95 @@
-# Turborepo starter
+# MailPilot
 
-This Turborepo starter is maintained by the Turborepo core team.
+AI-powered email drafting and Gmail assistance, delivered as a Chrome extension backed by a Bun/Elysia API.
 
-## Using this example
+MailPilot helps you read context, draft responses, and send emails faster, with a lightweight backend and a focused extension UI.
 
-Run the following command:
+## Overview
 
-```sh
-npx create-turbo@latest
+MailPilot is a monorepo that contains:
+
+- A **backend API** (`apps/backend`) built with [Bun](https://bun.sh/) and [Elysia](https://elysiajs.com/) that:
+  - Stores user conversations in a database via the `db` package.
+  - Integrates with Gmail via OAuth to read and send email on behalf of the user.
+  - Uses OpenAI Agents to generate and refine email drafts.
+- A **Chrome extension** (`apps/extention`) built with [Plasmo](https://docs.plasmo.com/) and React that:
+  - Renders a polished popup and sidepanel UI using Tailwind v3 and CSS variables.
+  - Connects to the backend to orchestrate AI-assisted email flows.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  browser[Browser] --> extension[ChromeExtension]
+  extension --> backend[BunElysiaBackend]
+  backend --> db[DB via db package]
+  backend --> gmail[Gmail API]
 ```
 
-## What's inside?
+- The **extension** runs entirely in the browser and talks to the backend over HTTP.
+- The **backend** exposes routes for authentication, chat, and Gmail OAuth, and persists data using the shared `db` package.
 
-This Turborepo includes the following packages/apps:
+## Getting Started (local)
 
-### Apps and Packages
+> [!NOTE]
+> These commands assume you have [Bun](https://bun.sh/) installed and a recent Node/Chrome setup.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+1. **Install dependencies**
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+   ```bash
+   bun install
+   ```
 
-### Utilities
+2. **Run the backend**
 
-This Turborepo has some additional tools already setup for you:
+   ```bash
+   cd apps/backend
+   bun run dev
+   # Backend listens on http://localhost:3000
+   ```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+3. **Run the extension**
 
-### Build
+   ```bash
+   cd apps/extention
+   bun run dev
+   ```
 
-To build all apps and packages, run the following command:
+   Then in Chrome:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+   - Open `chrome://extensions`.
+   - Enable **Developer mode**.
+   - Click **Load unpacked** and choose the dev build directory documented by Plasmo (e.g. `apps/extention/build/chrome-mv3-dev`).
 
-```sh
-cd my-turborepo
-turbo build
-```
+You can now open the popup or sidepanel surfaces and interact with MailPilot while the backend is running on `localhost:3000`.
 
-Without global `turbo`, use your package manager:
+## Running with Docker
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+Only the **backend API** is containerized. The Chrome extension is still built with Plasmo and loaded into Chrome via `chrome://extensions`.
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+This repository includes a Docker setup (see `apps/backend/Dockerfile` and `docker-compose.yml`):
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+- `docker compose up --build backend` will:
+  - Build a multi-stage image for the Bun/Elysia API.
+  - Start the backend on `http://localhost:3000`.
 
-```sh
-turbo build --filter=docs
-```
+Use Docker to run the backend in a reproducible environment and integrate with CI/CD. The extension continues to be developed and loaded using the normal Plasmo workflow.
 
-Without global `turbo`:
+## Project Structure
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+- `apps/backend` – Bun/Elysia API for chat, users, auth, and Gmail OAuth.
+- `apps/extention` – Plasmo-based React extension (popup, sidepanel, options, newtab).
+- `packages/db` – Drizzle ORM schema and database access shared by the backend.
+- `packages/eslint-config`, `packages/typescript-config` – Shared tooling configuration.
 
-### Develop
+## Tech Stack and Conventions
 
-To develop all apps and packages, run the following command:
+- **Backend**: Bun, Elysia, Drizzle ORM, OpenAI Agents.
+- **Extension**: Plasmo, React 18, Tailwind CSS v3, CSS variables for theming.
+- **Monorepo tooling**: Turborepo, TypeScript, ESLint, Prettier.
+- **Styling**:
+  - Tailwind v3 with `@tailwind base/components/utilities` in `apps/extention/src/style.css`.
+  - Design tokens (colors, radii, typography) defined as CSS variables.
+  - Micro-interactions implemented via Tailwind utilities and CSS transitions (no Motion/Framer Motion dependency).
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+For more details on the extension’s styling and motion principles, see the Tailwind v3 styling plan (`.cursor/plans/retune_extension_to_tailwind_v3_b6491fc0.plan.md`) used during development.
