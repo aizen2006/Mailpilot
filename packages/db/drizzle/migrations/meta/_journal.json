@@ -50,6 +50,13 @@
       "when": 1775045039728,
       "tag": "0006_next_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1775201765438,
+      "tag": "0007_majestic_sabra",
+      "breakpoints": true
     }
   ]
 }

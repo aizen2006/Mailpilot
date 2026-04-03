@@ -3,14 +3,14 @@ import { cva, type VariantProps } from "class-variance-authority"
 import cn from "~libs/cn"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-[var(--radius-md)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-[var(--radius-md)] text-sm font-medium transition-[color,background-color,box-shadow,transform] duration-150 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100",
   {
     variants: {
       variant: {
-        primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]",
+        primary: "bg-[var(--color-primary)] text-white shadow-sm hover:bg-[var(--color-primary-hover)]",
         ghost: "bg-transparent text-[var(--color-text)] hover:bg-[var(--color-bg-muted)]",
         subtle:
-          "bg-[var(--color-bg-muted)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          "bg-[var(--color-bg-muted)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
       },
       size: {
         sm: "h-8 px-3",

@@ -8,7 +8,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         status: "bg-[var(--color-bg-muted)] text-[var(--color-text-muted)]",
-        tone: "bg-teal-50 text-teal-700"
+        tone: "bg-[var(--color-tone-bg)] text-[var(--color-tone-fg)]"
       }
     },
     defaultVariants: {

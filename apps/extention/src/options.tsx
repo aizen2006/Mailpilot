@@ -1,3 +1,5 @@
+import "./style.css"
+
 function IndexOptions() {
   return (
     <main className="min-h-screen bg-[var(--color-bg)] p-6 text-[var(--color-text)]">

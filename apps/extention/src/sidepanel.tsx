@@ -1,3 +1,5 @@
+import "./style.css"
+
 import { ExtensionChat } from "~Components/layout/ExtensionChat"
 import { PageShell } from "~Components/layout/PageShell"
 
