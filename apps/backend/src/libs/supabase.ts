@@ -1,4 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config';
+import { createClient } from "@supabase/supabase-js";
+import "dotenv/config";
 
-export const supabase = createClient(process.env.VITE_SUPABASE_URL,process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY);
+const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+const anon =
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!url || !anon) {
+    console.warn(
+        "[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY — auth routes may fail until env is set."
+    );
+}
+
+export const supabase = createClient(url ?? "", anon ?? "");

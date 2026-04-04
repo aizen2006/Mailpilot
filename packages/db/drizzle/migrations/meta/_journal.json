@@ -57,6 +57,20 @@
       "when": 1775201765438,
       "tag": "0007_majestic_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775282100045,
+      "tag": "0008_users_id_no_default",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775283625839,
+      "tag": "0009_billing_usage_linking",
+      "breakpoints": true
     }
   ]
 }

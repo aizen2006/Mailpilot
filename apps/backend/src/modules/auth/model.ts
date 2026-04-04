@@ -12,7 +12,9 @@ const Auth ={
     signOut:t.Object({
         message:t.Literal('User SignOut successfully'),
     }),
-} as const 
+} as const;
+
+export { Auth };
 
 export type Auth = {
     [k in keyof typeof Auth]: UnwrapSchema<typeof Auth[k]>

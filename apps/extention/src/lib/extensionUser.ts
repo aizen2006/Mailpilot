@@ -1,3 +1,8 @@
+/**
+ * Anonymous extension user id. To use your Supabase account instead: open the web app Settings,
+ * generate a link code, then POST `{API}/user/link-extension` with `{ code, extensionUserId }`
+ * (or add UI in the extension that calls the same).
+ */
 import { Storage } from "@plasmohq/storage";
 
 const storage = new Storage({ area: "local" });

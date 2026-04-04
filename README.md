@@ -1,95 +1,116 @@
 # MailPilot
 
-AI-powered email drafting and Gmail assistance, delivered as a Chrome extension backed by a Bun/Elysia API.
-
-MailPilot helps you read context, draft responses, and send emails faster, with a lightweight backend and a focused extension UI.
+AI-assisted email workflows: a **Next.js** dashboard with **Supabase Auth**, a **Bun / Elysia** API, and a **Plasmo** Chrome extension. Gmail is connected via Google OAuth on the backend.
 
 ## Overview
 
-MailPilot is a monorepo that contains:
+| Package | Role |
+| ------- | ---- |
+| [`apps/web`](apps/web) | Next.js 16 app: sign-in, settings, Gmail connect completion (`/connect/gmail/done`), calls the API with `NEXT_PUBLIC_API_URL` and the user’s Supabase session. |
+| [`apps/backend`](apps/backend) | Elysia HTTP API: auth helpers, user sync and extension linking, Gmail OAuth, chat, usage, Stripe billing. |
+| [`apps/extention`](apps/extention) | Chrome extension (popup, side panel): talks to the API via `PLASMO_PUBLIC_API_URL` (default `http://localhost:3000`). |
+| [`packages/db`](packages/db) | Shared **Drizzle** schema and Postgres access used by the backend. |
 
-- A **backend API** (`apps/backend`) built with [Bun](https://bun.sh/) and [Elysia](https://elysiajs.com/) that:
-  - Stores user conversations in a database via the `db` package.
-  - Integrates with Gmail via OAuth to read and send email on behalf of the user.
-  - Uses OpenAI Agents to generate and refine email drafts.
-- A **Chrome extension** (`apps/extention`) built with [Plasmo](https://docs.plasmo.com/) and React that:
-  - Renders a polished popup and sidepanel UI using Tailwind v3 and CSS variables.
-  - Connects to the backend to orchestrate AI-assisted email flows.
+> [!TIP]
+> Full route lists and auth rules live in **[docs/API.md](docs/API.md)**. With the API running, open **[http://localhost:3000/swagger](http://localhost:3000/swagger)** for interactive OpenAPI (JSON at `/swagger/json`).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  browser[Browser] --> extension[ChromeExtension]
-  extension --> backend[BunElysiaBackend]
-  backend --> db[DB via db package]
-  backend --> gmail[Gmail API]
+  subgraph browser[Browser]
+    web[Next.js web]
+    ext[Chrome extension]
+  end
+  supa[Supabase Auth]
+  api[Bun Elysia API]
+  db[(Postgres)]
+  gmail[Gmail API]
+  stripe[Stripe]
+
+  web --> supa
+  web --> api
+  ext --> api
+  api --> supa
+  api --> db
+  api --> gmail
+  api --> stripe
 ```
 
-- The **extension** runs entirely in the browser and talks to the backend over HTTP.
-- The **backend** exposes routes for authentication, chat, and Gmail OAuth, and persists data using the shared `db` package.
+- **Web** uses Supabase for sessions; protected API calls send `Authorization: Bearer <access_token>`.
+- **Extension** bootstraps an anonymous user (`POST /user/bootstrap-extension`) and can be **linked** to the web account with a one-time code from Settings (`POST /user/link-code` → `POST /user/link-extension`).
+- **Gmail** OAuth starts at `GET /oauth/google/start?userId=…` (browser redirect); after success, Google redirects to the callback and the API forwards to **`OAUTH_SUCCESS_URL`** (e.g. your web origin + `/connect/gmail/done?connected=1`).
 
-## Getting Started (local)
+## Getting started (local)
 
 > [!NOTE]
-> These commands assume you have [Bun](https://bun.sh/) installed and a recent Node/Chrome setup.
+> Requires [Bun](https://bun.sh/), Postgres, and a recent Chrome build. Copy env examples before running services.
 
-1. **Install dependencies**
+1. **Install dependencies** (repo root)
 
    ```bash
    bun install
    ```
 
-2. **Run the backend**
+2. **Database** — set `DATABASE_URL` for [`packages/db`](packages/db) (see [`apps/backend/.env.example`](apps/backend/.env.example)), then apply migrations:
+
+   ```bash
+   cd packages/db
+   bun run drizzle:migrate
+   ```
+
+3. **Environment files**
+
+   - Backend: copy [`apps/backend/.env.example`](apps/backend/.env.example) to `apps/backend/.env` or `.env.local` and fill values (Supabase service role, Google OAuth, Stripe, etc.).
+   - Web: copy [`apps/web/.env.example`](apps/web/.env.example) — `NEXT_PUBLIC_SUPABASE_*`, `NEXT_PUBLIC_API_URL` (point at `http://localhost:3000`).
+   - Extension: set `PLASMO_PUBLIC_API_URL` when building (e.g. in `.env` next to the Plasmo app) if not using the default.
+
+4. **Run the API** (port **3000**)
 
    ```bash
    cd apps/backend
    bun run dev
-   # Backend listens on http://localhost:3000
    ```
 
-3. **Run the extension**
+5. **Run the web app** on another port to avoid clashing with the API, e.g. **3001**:
+
+   ```bash
+   cd apps/web
+   bun run dev -- -p 3001
+   ```
+
+6. **Run the extension**
 
    ```bash
    cd apps/extention
    bun run dev
    ```
 
-   Then in Chrome:
+   In Chrome: `chrome://extensions` → Developer mode → **Load unpacked** → choose the Plasmo dev output (e.g. `apps/extention/build/chrome-mv3-dev`).
 
-   - Open `chrome://extensions`.
-   - Enable **Developer mode**.
-   - Click **Load unpacked** and choose the dev build directory documented by Plasmo (e.g. `apps/extention/build/chrome-mv3-dev`).
+Align **`OAUTH_SUCCESS_URL`** on the backend with your web origin and Gmail done page, for example `http://localhost:3001/connect/gmail/done`, so the OAuth callback can redirect users back to the dashboard.
 
-You can now open the popup or sidepanel surfaces and interact with MailPilot while the backend is running on `localhost:3000`.
+## Docker
 
-## Running with Docker
+Only the **backend** is containerized ([`apps/backend/Dockerfile`](apps/backend/Dockerfile), [`docker-compose.yml`](docker-compose.yml)).
 
-Only the **backend API** is containerized. The Chrome extension is still built with Plasmo and loaded into Chrome via `chrome://extensions`.
+```bash
+docker compose up --build backend
+```
 
-This repository includes a Docker setup (see `apps/backend/Dockerfile` and `docker-compose.yml`):
+The compose file expects secrets in **`apps/backend/.env.local`**. The web app and extension still run locally with the steps above.
 
-- `docker compose up --build backend` will:
-  - Build a multi-stage image for the Bun/Elysia API.
-  - Start the backend on `http://localhost:3000`.
+## Project structure
 
-Use Docker to run the backend in a reproducible environment and integrate with CI/CD. The extension continues to be developed and loaded using the normal Plasmo workflow.
+- `apps/backend` — Elysia API; see [docs/API.md](docs/API.md) and `/swagger`.
+- `apps/web` — Next.js 16 dashboard and Supabase SSR.
+- `apps/extention` — Plasmo + React (popup, side panel, options).
+- `packages/db` — Drizzle schema and migrations.
+- `packages/eslint-config`, `packages/typescript-config` — shared tooling.
 
-## Project Structure
+## Tech stack
 
-- `apps/backend` – Bun/Elysia API for chat, users, auth, and Gmail OAuth.
-- `apps/extention` – Plasmo-based React extension (popup, sidepanel, options, newtab).
-- `packages/db` – Drizzle ORM schema and database access shared by the backend.
-- `packages/eslint-config`, `packages/typescript-config` – Shared tooling configuration.
-
-## Tech Stack and Conventions
-
-- **Backend**: Bun, Elysia, Drizzle ORM, OpenAI Agents.
-- **Extension**: Plasmo, React 18, Tailwind CSS v3, CSS variables for theming.
-- **Monorepo tooling**: Turborepo, TypeScript, ESLint, Prettier.
-- **Styling**:
-  - Tailwind v3 with `@tailwind base/components/utilities` in `apps/extention/src/style.css`.
-  - Design tokens (colors, radii, typography) defined as CSS variables.
-  - Micro-interactions implemented via Tailwind utilities and CSS transitions (no Motion/Framer Motion dependency).
-
-For more details on the extension’s styling and motion principles, see the Tailwind v3 styling plan (`.cursor/plans/retune_extension_to_tailwind_v3_b6491fc0.plan.md`) used during development.
+- **API:** Bun, Elysia, Drizzle, Google APIs, Stripe, OpenAI Agents.
+- **Web:** Next.js 16, React 19, Supabase JS/SSR, Tailwind CSS v4.
+- **Extension:** Plasmo, React 18, Tailwind v3, TanStack Query.
+- **Monorepo:** Turborepo, TypeScript, ESLint, Prettier.
