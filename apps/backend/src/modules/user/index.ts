@@ -5,6 +5,9 @@ import { Elysia , status } from 'elysia';
 
 const app = new Elysia({prefix:'/user'})
     .get('/health',()=>console.log("User Route is Working"))
+    .post('/bootstrap-extension', async () => {
+        return UserService.bootstrapExtensionUser();
+    })
     .get('/byId',async({body})=>{
         const { userId } = body;
         const {data,error} = await UserService.getUserById(userId);

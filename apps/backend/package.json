@@ -6,6 +6,7 @@
     "build": "bun run build src/index.ts"
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.4.1",
     "@openai/agents": "^0.8.2",
     "@supabase/supabase-js": "^2.100.1",
     "db": "workspace:*",

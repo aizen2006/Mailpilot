@@ -10,10 +10,10 @@ export function PageShell({ mode, className, children }: PageShellProps) {
   return (
     <main
       className={cn(
-        "relative isolate bg-[var(--color-bg)] p-3 text-[var(--color-text)] antialiased",
+        "relative isolate bg-[var(--color-bg)] text-[var(--color-text)] antialiased",
         mode === "popup"
-          ? "h-[560px] w-[390px]"
-          : "h-screen min-h-screen w-full max-w-none p-4",
+          ? "h-[550px] w-[380px] p-4 text-sm"
+          : "h-screen min-h-screen w-full max-w-none p-4 text-sm",
         className
       )}>
       {children}

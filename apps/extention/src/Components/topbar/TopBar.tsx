@@ -27,19 +27,35 @@ function IconClose(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function TopBar() {
+type TopBarProps = {
+  gmailConnected?: boolean
+  gmailEmail?: string
+  gmailLoading?: boolean
+}
+
+export function TopBar({ gmailConnected, gmailEmail, gmailLoading }: TopBarProps) {
+  const badgeLabel = gmailLoading
+    ? "Checking Gmail…"
+    : gmailConnected
+      ? gmailEmail
+        ? `Connected as ${gmailEmail}`
+        : "Connected to Gmail"
+      : "Gmail not connected"
+
   return (
     <div className="flex items-start justify-between gap-3">
-      <div className="space-y-1.5">
-        <h1 className="font-display text-xl font-semibold tracking-tight text-[var(--color-text)]">
+      <div className="min-w-0 space-y-1">
+        <h1 className="text-lg font-semibold tracking-tight text-[var(--color-text)] sm:text-xl">
           MailPilot
         </h1>
-        <div className="flex items-center gap-2">
-          <Badge variant="status">Connected to Gmail</Badge>
+        <div className="flex min-w-0 items-center gap-2">
+          <Badge className="max-w-full truncate" title={badgeLabel} variant="status">
+            {badgeLabel}
+          </Badge>
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1">
         <Button aria-label="Settings" size="sm" variant="ghost">
           <IconGear className="h-4 w-4 text-[var(--color-text-muted)]" />
         </Button>

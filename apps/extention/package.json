@@ -35,10 +35,16 @@
   },
   "manifest": {
     "host_permissions": [
+      "http://localhost:3000/*",
       "https://*/*"
     ],
     "permissions": [
+      "sidePanel",
+      "storage",
       "tabs"
-    ]
+    ],
+    "side_panel": {
+      "default_path": "sidepanel.html"
+    }
   }
 }

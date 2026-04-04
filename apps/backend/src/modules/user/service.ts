@@ -6,13 +6,36 @@ the services will be connect the Gmail API or MCP which is better  ???
 user persona ( needed later will , do it via a vector DB ) // Quadrant
 Voice agent ( needed later ,  ) // try to create it using Sarvam  
 */
-import { status } from 'elysia';
-import db from 'db';
+import { randomUUID } from "node:crypto";
+import { status } from "elysia";
+import db from "db";
 import { UserTable, ConversationTable, MessageTable } from 'db/schema/schema';
 import { eq } from 'drizzle-orm';
 
 
 export abstract class UserService {
+    /** Creates a local DB user for the extension (OAuth tokens reference `users.id`). */
+    static async bootstrapExtensionUser() {
+        try {
+            const password = await Bun.password.hash(randomUUID());
+            const email = `ext-${randomUUID()}@users.mailpilot.local`;
+            const [row] = await db
+                .insert(UserTable)
+                .values({
+                    name: "MailPilot Extension",
+                    email,
+                    password,
+                })
+                .returning({ id: UserTable.id });
+            if (!row) {
+                throw status(500, "Failed to create extension user");
+            }
+            return { userId: row.id };
+        } catch (error) {
+            throw status(500, `Error while bootstrapping extension user: ${error}`);
+        }
+    }
+
     static async getUserById(userId:string){
         try {
             const user = await db.select()

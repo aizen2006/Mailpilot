@@ -6,22 +6,32 @@ import { EmptyState } from "~Components/states/EmptyState"
 import { ErrorState } from "~Components/states/ErrorState"
 import { TopBar } from "~Components/topbar/TopBar"
 import { Button } from "~Components/ui/Button"
+import { useExtensionUser } from "~hooks/useExtensionUser"
+import { useGmailStatus } from "~hooks/useGmailStatus"
 
 type UiState = "loading" | "empty" | "error" | "ready"
 
 type ExtensionChatProps = {
-  mode: "popup" | "sidebar"
   state?: UiState
 }
 
 function ChatBody({ state }: { state: UiState }) {
-  if (state === "loading") return <ChatSkeleton />
-  if (state === "empty") return <EmptyState />
-  if (state === "error") return <ErrorState />
+  if (state === "loading") {
+    return <ChatSkeleton />
+  }
+  if (state === "empty") {
+    return <EmptyState />
+  }
+  if (state === "error") {
+    return <ErrorState />
+  }
   return <MessageList />
 }
 
-export function ExtensionChat({ mode, state = "ready" }: ExtensionChatProps) {
+export function ExtensionChat({ state = "ready" }: ExtensionChatProps) {
+  const { userId, loading: userLoading } = useExtensionUser()
+  const gmail = useGmailStatus(userId)
+
   return (
     <ChatLayout
       composer={<SearchBar />}
@@ -33,8 +43,13 @@ export function ExtensionChat({ mode, state = "ready" }: ExtensionChatProps) {
           <Button variant="ghost">Copy</Button>
         </div>
       }
-      header={<TopBar />}
-      mode={mode}>
+      header={
+        <TopBar
+          gmailConnected={gmail.connected}
+          gmailEmail={gmail.email}
+          gmailLoading={gmail.loading || userLoading}
+        />
+      }>
       <ChatBody state={state} />
     </ChatLayout>
   )

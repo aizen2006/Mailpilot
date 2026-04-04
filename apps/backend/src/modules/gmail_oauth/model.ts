@@ -1,15 +1,20 @@
-import { t, type UnwrapSchema } from 'elysia';
+import { t, type UnwrapSchema } from "elysia";
 
 export const GmailOAuthModel = {
-    BodyOAuthUrl:t.Object({
-        userId:t.String(),
+    QueryUserId: t.Object({
+        userId: t.String({ format: "uuid" }),
     }),
-    OAuthToken: t.Object({
-        code: t.String(),
-        state: t.String(),
-    })
+    QueryOAuthCallback: t.Object(
+        {
+            code: t.Optional(t.String()),
+            state: t.Optional(t.String()),
+            error: t.Optional(t.String()),
+            error_description: t.Optional(t.String()),
+        },
+        { additionalProperties: true }
+    ),
 } as const;
 
 export type GmailOAuthModel = {
-    [k in keyof typeof GmailOAuthModel]: UnwrapSchema<typeof GmailOAuthModel[k]>
-}
+    [k in keyof typeof GmailOAuthModel]: UnwrapSchema<(typeof GmailOAuthModel)[k]>;
+};
