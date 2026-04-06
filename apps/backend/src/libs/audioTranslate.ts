@@ -1,18 +1,20 @@
-import { sarvam } from "./sarvam";
+import type { Buffer } from "buffer";
 import { status } from "elysia";
-import { Buffer } from "buffer";
+import { SarvamAIClient } from "sarvamai";
+import 'dotenv/config';
 
-export default function audioTranslate(audio:Buffer){
+export const sarvam = new SarvamAIClient({
+    apiSubscriptionKey: process.env.SARVAM_API_KEY!,
+});
+
+export default async function audioTranslate(audio: Buffer){
     try {
-        const response = await sarvam.speechToText({
+        const response = await sarvam.speechToText.translate({
             file:audio,
-            model:"sarvam-30b",
-            temperature:0.5,
-            top_p:0.5,
-            reasoning_effort:"medium"
+            model: "saaras:v2.5"
         });
-        return status(200,'Audio translated to text successfully',response)
+        return response as unknown as string;
     } catch (error) {
-        throw status(500,'Error while translating audio to text',error as Error)
+        throw status(500,`Error while translating audio to text: ${error}`);
     }
 }

@@ -71,6 +71,13 @@
       "when": 1775283625839,
       "tag": "0009_billing_usage_linking",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1775366400000,
+      "tag": "0010_migration",
+      "breakpoints": true
     }
   ]
 }

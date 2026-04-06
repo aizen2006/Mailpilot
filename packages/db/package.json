@@ -7,10 +7,12 @@
   },
   "private": true,
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./corsair": "./corsair/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.21.0"
   },
@@ -18,9 +20,13 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@corsair-dev/cli": "^0.1.5",
+    "@corsair-dev/gmail": "^0.1.0",
     "@supabase/supabase-js": "^2.100.1",
+    "corsair": "^0.1.50",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.2",
+    "pg": "^8.20.0",
     "postgres": "^3.4.8"
   }
 }

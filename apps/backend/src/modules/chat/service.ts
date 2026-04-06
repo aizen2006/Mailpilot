@@ -1,98 +1,131 @@
-import { status } from 'elysia';
-import { sarvam } from '../../libs/sarvam';
-import { Buffer } from 'buffer';
-import db from 'db';
-import { ConversationTable, MessageTable } from 'db/schema/schema';
-import audioTranslate from '../../libs/audioTranslate';
-import { eq } from 'drizzle-orm';
+import { ElysiaCustomStatusResponse, status } from "elysia";
+import type { Buffer } from "buffer";
+import db from "db";
+import { ConversationTable, MessageTable } from "db/schema/schema";
+import audioTranslate from "../../libs/audioTranslate";
+import emailAgent from "../../../agents";
 
 export abstract class ChatService {
-
-    static async chat_text(conversationId:string || null , userId:string , message:string){
+    static async chat_text(
+        userId: string,
+        userMessage: string,
+        conversationId: string | null = null,
+    ) {
         try {
-            if(!conversationId){
-                const conversation = await db.insert(ConversationTable).values({
-                    userId:userId,
-                    title:"New Conversation",
-                }).returning({id:ConversationTable.id});
-                if(!conversation){
-                    throw status(400,'Error while creating conversation')
+            let activeConversationId = conversationId;
+            if (!activeConversationId) {
+                const [row] = await db
+                    .insert(ConversationTable)
+                    .values({
+                        userId,
+                        title: "New Conversation",
+                    })
+                    .returning({ id: ConversationTable.id });
+                if (!row?.id) {
+                    throw status(400, "Error while creating conversation");
                 }
-                conversationId = conversation[0].id;
+                activeConversationId = row.id;
             }
-            const message = await db.insert(MessageTable).values({
-                conversationId:conversationId,
-                content:message,
-                role:"user"
-            }).returning({id:MessageTable.id});
-            if(!message){
-                throw status(400,'Error while creating message')
+            const insertedUserMessage = await db
+                .insert(MessageTable)
+                .values({
+                    conversationId: activeConversationId,
+                    content: userMessage,
+                    role: "user",
+                })
+                .returning({ id: MessageTable.id });
+            if (!insertedUserMessage?.length) {
+                throw status(400, "Error while creating message");
             }
-            const response = await sarvam.chat.completions({
-                model:"sarvam-30b"
-                messages:[{role:"user",content:message}],
-                temperature:0.5,
-                top_p:0.5,
-                reasoning_effort:"medium"
-            })
-            const assistant_response = await db.insert(MessageTable).values({
-                conversationId:conversationId,
-                content:response.choices[0].message.content,
-                role:"assistant"
-            }).returning({id:MessageTable.id});
-            if(!assistant_response){
-                throw status(400,'Error while creating assistant response')
+            // Agent Logic 
+            const content = await emailAgent(userId, activeConversationId, userMessage);
+            if (content == null) {
+                throw status(502, "Empty model response");
             }
-            return status(200,'Conversation created successfully',{
-                conversationId:conversationId,
-                Response : response
-            })
+            const assistantRows = await db
+                .insert(MessageTable)
+                .values({
+                    conversationId: activeConversationId,
+                    content: content as string,
+                    role: "assistant",
+                })
+                .returning({ id: MessageTable.id });
+            if (!assistantRows?.length) {
+                throw status(400, "Error while creating assistant response");
+            }
+            return status(200, {
+                message: "Conversation created successfully",
+                conversationId: activeConversationId,
+                Response: content,
+            });
         } catch (error) {
-            throw status(500,'Error while chatting with the assistant',error as Error)
+            if (error instanceof ElysiaCustomStatusResponse) throw error;
+            throw status(
+                500,
+                error instanceof Error ? error.message : "Error while chatting with the assistant",
+            );
         }
     }
-    static async chat_audio(userId:string,conversationId:string || null , audio:Buffer){
+
+    static async chat_audio(
+        userId: string,
+        audio: Buffer,
+        conversationId: string | null = null,
+    ) {
         try {
             const text = await audioTranslate(audio);
-            if(!conversationId){
-                const conversation = await db.insert(ConversationTable).values({
-                    userId:userId,
-                    title:"New Conversation",
-                }).returning({id:ConversationTable.id});
-                if(!conversation){
-                    throw status(400,'Error while creating conversation')
+            if (text == null) {
+                throw status(502, "Failed to translate audio ");
+            }
+            let activeConversationId = conversationId;
+            if (!activeConversationId) {
+                const [row] = await db
+                    .insert(ConversationTable)
+                    .values({
+                        userId,
+                        title: "New Conversation",
+                    })
+                    .returning({ id: ConversationTable.id });
+                if (!row?.id) {
+                    throw status(400, "Error while creating conversation");
                 }
-                conversationId = conversation[0].id;
+                activeConversationId = row.id;
             }
-            const message = await db.insert(MessageTable).values({
-                conversationId:conversationId,
-                content:text,
-                role:"user"
-            }).returning({id:MessageTable.id});
-            if(!message){
-                throw status(400,'Error while creating message')
+            const insertedUserMessage = await db
+                .insert(MessageTable)
+                .values({
+                    conversationId: activeConversationId,
+                    content: text as string,
+                    role: "user",
+                })
+                .returning({ id: MessageTable.id });
+            if (!insertedUserMessage?.length) {
+                throw status(400, "Error while creating message");
             }
-            const response = await sarvam.chat.completions({
-                model:"sarvam-30b"
-                messages:[{role:"user",content:text}],
-                temperature:0.5,
-                top_p:0.5,
-                reasoning_effort:"medium"
-            })
-            const assistant_response = await db.insert(MessageTable).values({
-                conversationId:conversationId,
-                content:response.choices[0].message.content,
-                role:"assistant"
-            }).returning({id:MessageTable.id});
-            if(!assistant_response){
-                throw status(400,'Error while creating assistant response')
+            // agent logic 
+            const content = await emailAgent(userId, activeConversationId, text as string);
+            const assistantRows = await db
+                .insert(MessageTable)
+                .values({
+                    conversationId: activeConversationId,
+                    content: content as string,
+                    role: "assistant",
+                })
+                .returning({ id: MessageTable.id });
+            if (!assistantRows?.length) {
+                throw status(400, "Error while creating assistant response");
             }
-            return status(200,'Conversation created successfully',{
-                conversationId:conversationId,
-                Response : response
-            })
+            return status(200, {
+                message: "Conversation created successfully",
+                conversationId: activeConversationId,
+                Response: content,
+            });
         } catch (error) {
-            throw status(500,'Error while chatting with the assistant',error as Error)
+            if (error instanceof ElysiaCustomStatusResponse) throw error;
+            throw status(
+                500,
+                error instanceof Error ? error.message : "Error while chatting with the assistant",
+            );
         }
     }
 }
