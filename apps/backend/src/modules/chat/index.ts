@@ -8,8 +8,8 @@ const app = new Elysia({ prefix: "/chat" })
     .post(
         "/text",
         async ({ body }) => {
-            const { userId, message } = body;
-            return ChatService.chat_text(userId, message);
+            const { userId, message, conversationId } = body;
+            return ChatService.chat_text(userId, message, conversationId ?? null);
         },
         {
             body: chatSchemas.chat_text,

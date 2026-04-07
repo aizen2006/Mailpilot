@@ -1,6 +1,7 @@
 import { Elysia, status } from "elysia";
 import { Auth } from "./model";
 import { Auth as AuthService } from "./service";
+import { bearerToken } from "../../libs/requireAuth";
 
 const app = new Elysia({ prefix: "/auth" })
     .get("/health", () => console.log("Auth Route is Working"))
@@ -32,6 +33,22 @@ const app = new Elysia({ prefix: "/auth" })
             return status(500, result.error);
         }
         return { ok: true };
+    })
+    .get("/me", async ({ request }) => {
+        const token = bearerToken(request);
+        if (!token) {
+            return status(401, "Missing Bearer token");
+        }
+
+        try {
+            const result = await AuthService.me(token);
+            if (result.error) {
+                return status(401, result.error);
+            }
+            return result.user;
+        } catch {
+            return status(503, "Supabase admin client not configured");
+        }
     });
 
 export { app };

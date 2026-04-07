@@ -47,7 +47,10 @@ const app = new Elysia({ prefix: "/oauth" })
     .get(
         "/google/start",
         ({ query }) => {
-            const url = GmailOAuthService.buildGoogleAuthUrl(query.userId);
+            const url = GmailOAuthService.buildGoogleAuthUrl(
+                query.userId,
+                query.extensionRedirectUri
+            );
             return Response.redirect(url, 302);
         },
         { query: GmailOAuthModel.QueryUserId }
@@ -55,7 +58,12 @@ const app = new Elysia({ prefix: "/oauth" })
     .get(
         "/google/url",
         ({ query }) => {
-            return { url: GmailOAuthService.buildGoogleAuthUrl(query.userId) };
+            return {
+                url: GmailOAuthService.buildGoogleAuthUrl(
+                    query.userId,
+                    query.extensionRedirectUri
+                ),
+            };
         },
         { query: GmailOAuthModel.QueryUserId }
     )
@@ -72,10 +80,21 @@ const app = new Elysia({ prefix: "/oauth" })
             if (!code || !state) {
                 return Response.redirect(`${base}?error=missing_params`, 302);
             }
+            const parsedState = GmailOAuthService.decodeState(state);
+            const userId = parsedState.userId;
             try {
-                await GmailOAuthService.exchangeAndSaveTokens(code, state);
+                await GmailOAuthService.exchangeAndSaveTokens(code, userId);
             } catch {
+                if (parsedState.extensionRedirectUri) {
+                    return Response.redirect(
+                        `${parsedState.extensionRedirectUri}?error=token_exchange`,
+                        302
+                    );
+                }
                 return Response.redirect(`${base}?error=token_exchange`, 302);
+            }
+            if (parsedState.extensionRedirectUri) {
+                return Response.redirect(`${parsedState.extensionRedirectUri}?connected=1`, 302);
             }
             return Response.redirect(`${base}?connected=1`, 302);
         },
@@ -92,6 +111,14 @@ const app = new Elysia({ prefix: "/oauth" })
             return GmailOAuthService.getGmailStatus(query.userId);
         },
         { query: GmailOAuthModel.QueryUserId }
+    )
+    .post(
+        "/gmail/disconnect",
+        async ({ body }) => {
+            await GmailOAuthService.disconnectGmail(body.userId);
+            return { ok: true };
+        },
+        { body: GmailOAuthModel.BodyUserId }
     );
 
 export { app };

@@ -1,8 +1,8 @@
 {
-  "name": "extention",
-  "displayName": "Extention",
-  "version": "0.0.1",
-  "description": ".",
+  "name": "mailpilot",
+  "displayName": "MailPilot",
+  "version": "1.0.0",
+  "description": "AI-powered email assistant that drafts, summarises and sends emails directly from your browser.",
   "author": "Soubhik",
   "scripts": {
     "dev": "plasmo dev",
@@ -12,7 +12,6 @@
   "dependencies": {
     "@plasmohq/messaging": "^0.7.2",
     "@plasmohq/storage": "^1.15.0",
-    "@tanstack/react-query": "^5.95.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "plasmo": "0.90.5",
@@ -35,13 +34,13 @@
   },
   "manifest": {
     "host_permissions": [
-      "http://localhost:3000/*",
       "https://*/*"
     ],
     "permissions": [
       "sidePanel",
       "storage",
-      "tabs"
+      "tabs",
+      "identity"
     ],
     "side_panel": {
       "default_path": "sidepanel.html"

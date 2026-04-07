@@ -3,6 +3,10 @@ import { t, type UnwrapSchema } from "elysia";
 export const GmailOAuthModel = {
     QueryUserId: t.Object({
         userId: t.String({ format: "uuid" }),
+        extensionRedirectUri: t.Optional(t.String()),
+    }),
+    BodyUserId: t.Object({
+        userId: t.String({ format: "uuid" }),
     }),
     QueryOAuthCallback: t.Object(
         {

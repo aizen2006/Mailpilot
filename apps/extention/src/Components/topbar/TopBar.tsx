@@ -31,9 +31,17 @@ type TopBarProps = {
   gmailConnected?: boolean
   gmailEmail?: string
   gmailLoading?: boolean
+  onSettings?: () => void
+  onClose?: () => void
 }
 
-export function TopBar({ gmailConnected, gmailEmail, gmailLoading }: TopBarProps) {
+export function TopBar({
+  gmailConnected,
+  gmailEmail,
+  gmailLoading,
+  onSettings,
+  onClose,
+}: TopBarProps) {
   const badgeLabel = gmailLoading
     ? "Checking Gmail…"
     : gmailConnected
@@ -56,10 +64,18 @@ export function TopBar({ gmailConnected, gmailEmail, gmailLoading }: TopBarProps
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
-        <Button aria-label="Settings" size="sm" variant="ghost">
+        <Button
+          aria-label="Settings"
+          onClick={onSettings}
+          size="sm"
+          variant="ghost">
           <IconGear className="h-4 w-4 text-[var(--color-text-muted)]" />
         </Button>
-        <Button aria-label="Close" size="sm" variant="ghost">
+        <Button
+          aria-label="Close"
+          onClick={onClose}
+          size="sm"
+          variant="ghost">
           <IconClose className="h-4 w-4 text-[var(--color-text-muted)]" />
         </Button>
       </div>

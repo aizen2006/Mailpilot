@@ -9,7 +9,7 @@ type ChatLayoutProps = PropsWithChildren<{
 
 export function ChatLayout({ header, composer, footer, children }: ChatLayoutProps) {
   return (
-    <Card className="flex h-full flex-col overflow-hidden mx-auto max-w-2xl card-interactive">
+    <Card className="mx-auto flex h-full max-w-2xl flex-col overflow-hidden">
       <div className="border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 sm:p-4">
         {header}
       </div>

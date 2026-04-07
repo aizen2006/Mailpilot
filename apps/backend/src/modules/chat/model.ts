@@ -4,6 +4,7 @@ export const chatSchemas = {
     chat_text: t.Object({
         userId: t.String(),
         message: t.String(),
+        conversationId: t.Optional(t.String()),
     }),
     chat_audio: t.Object({
         userId: t.String(),

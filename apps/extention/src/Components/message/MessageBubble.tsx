@@ -21,8 +21,10 @@ type MessageBubbleProps = VariantProps<typeof bubbleVariants> & {
 
 export function MessageBubble({ role, text, meta }: MessageBubbleProps) {
   return (
-    <div className={cn("space-y-1", role === "user" && "items-end")}>
-      <div className={bubbleVariants({ role })}>{text}</div>
+    <div className={cn("msg-enter flex flex-col space-y-1", role === "user" && "items-end")}>
+      <div className={bubbleVariants({ role })}>
+        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{text}</pre>
+      </div>
       {meta ? <p className="px-1 text-xs text-[var(--color-text-soft)]">{meta}</p> : null}
     </div>
   )

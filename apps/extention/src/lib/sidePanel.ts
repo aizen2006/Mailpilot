@@ -1,7 +1,6 @@
 export async function openMailPilotSidePanel(): Promise<void> {
-  const w = await chrome.windows.getCurrent();
-  if (w.id === undefined) {
-    return;
-  }
-  await chrome.sidePanel.open({ windowId: w.id });
+  const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+  const windowId = activeTab?.windowId
+  if (windowId === undefined) return
+  await chrome.sidePanel.open({ windowId })
 }

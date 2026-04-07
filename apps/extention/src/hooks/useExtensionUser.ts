@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getApiBaseUrl } from "~lib/api";
 import { ensureExtensionUserId } from "~lib/extensionUser";
 
-export function useExtensionUser(): {
+export function useExtensionUser(enabled: boolean = true): {
   userId: string | null;
   error: string | null;
   loading: boolean;
@@ -12,6 +12,10 @@ export function useExtensionUser(): {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false)
+      return
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -32,7 +36,7 @@ export function useExtensionUser(): {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 
   return { userId, error, loading };
 }
