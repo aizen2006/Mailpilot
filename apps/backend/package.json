@@ -3,7 +3,8 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run src/index.ts",
-    "build": "bun run build src/index.ts"
+    "build": "bun build ./src/index.ts --outdir ./dist --target bun",
+    "start": "bun ./dist/index.js"
   },
   "dependencies": {
     "@corsair-dev/mcp": "^0.1.13",
