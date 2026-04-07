@@ -1,9 +1,9 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 function supabaseUrl(): string {
-    const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+    const url = process.env.SUPABASE_URL;
     if (!url) {
-        throw new Error("Missing SUPABASE_URL (or legacy VITE_SUPABASE_URL)");
+        throw new Error("Missing SUPABASE_URL");
     }
     return url;
 }

@@ -1,11 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 
-const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+const url = process.env.SUPABASE_URL;
 const anon =
     process.env.SUPABASE_ANON_KEY ??
-    process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.SUPABASE_PUBLISHABLE_DEFAULT_KEY ;
 
 if (!url || !anon) {
     console.warn(
