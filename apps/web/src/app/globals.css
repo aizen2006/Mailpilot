@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Surfaces ─────────────────────────────── */
+  --mp-canvas:        #f4f6f9;
+  --mp-surface:       #edf2f7;
+  --mp-card:          #ffffff;
+  --mp-elevated:      #e8eef6;
+
+  /* ── Brand ────────────────────────────────── */
+  --mp-primary:       #0f766e;
+  --mp-primary-deep:  #005c55;
+  --mp-primary-soft:  #9cf2e8;
+  --mp-focus:         #14b8a6;
+
+  /* ── Text ─────────────────────────────────── */
+  --mp-text:          #0d1c2e;
+  --mp-text-muted:    #4b5563;
+  --mp-text-soft:     #6b7280;
+
+  /* ── Borders & shadows ────────────────────── */
+  --mp-border:        rgba(189, 201, 198, 0.45);
+  --mp-shadow-card:
+    0px 4px 20px rgba(0, 92, 85, 0.04),
+    0px 10px 40px rgba(25, 28, 30, 0.06);
+  --mp-shadow-card-hover:
+    0px 6px 28px rgba(0, 92, 85, 0.07),
+    0px 14px 48px rgba(25, 28, 30, 0.09);
+
+  /* ── Radii ────────────────────────────────── */
+  --mp-radius-sm:     8px;
+  --mp-radius-md:     12px;
+  --mp-radius-lg:     16px;
+  --mp-radius-xl:     20px;
+
+  /* ── Easing curves (Emil Kowalski) ─────────── */
+  --ease-out:         cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out:      cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer:      cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--mp-canvas);
+  --color-foreground: var(--mp-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --mp-canvas:       #0c1222;
+    --mp-surface:      #151d2e;
+    --mp-card:         #1a2438;
+    --mp-elevated:     #1e293b;
+    --mp-text:         #eaf1ff;
+    --mp-text-muted:   #9ca3af;
+    --mp-text-soft:    #6b7280;
+    --mp-border:       rgba(148, 163, 184, 0.2);
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--mp-canvas);
+  color: var(--mp-text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* ── Button press feedback (Emil: scale on :active) ── */
+button,
+[role="button"],
+a[href] {
+  transition: transform 160ms var(--ease-out);
+}
+button:active,
+[role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* ── Reduced motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  [role="button"],
+  a[href] {
+    transition: none;
+  }
 }

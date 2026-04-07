@@ -39,7 +39,7 @@
     "permissions": [
       "sidePanel",
       "storage",
-      "tabs",
+      "windows",
       "identity"
     ],
     "side_panel": {

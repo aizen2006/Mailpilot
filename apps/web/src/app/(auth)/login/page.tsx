@@ -1,95 +1,178 @@
-"use client";
+"use client"
 
-import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useState } from "react"
+import { motion } from "motion/react"
+import { scaleFade } from "@/lib/motion"
 
 function LoginForm() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const next = searchParams.get("next") ?? "/dashboard/overview";
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get("next") ?? "/dashboard/overview"
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-    async function onSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        setError(null);
-        setLoading(true);
-        const supabase = createClient();
-        const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-        setLoading(false);
-        if (err) {
-            setError(err.message);
-            return;
-        }
-        router.push(next);
-        router.refresh();
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+    const supabase = createClient()
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(false)
+    if (err) {
+      setError(err.message)
+      return
     }
+    router.push(next)
+    router.refresh()
+  }
 
-    return (
-        <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-6">
-            <div>
-                <h1 className="text-xl font-semibold text-zinc-900">Log in</h1>
-                <p className="mt-1 text-sm text-zinc-600">Use your MailPilot account.</p>
-            </div>
-            <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-                <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-zinc-700">Email</span>
-                    <input
-                        autoComplete="email"
-                        className="rounded-md border border-zinc-300 px-3 py-2 text-zinc-900"
-                        name="email"
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        type="email"
-                        value={email}
-                    />
-                </label>
-                <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-zinc-700">Password</span>
-                    <input
-                        autoComplete="current-password"
-                        className="rounded-md border border-zinc-300 px-3 py-2 text-zinc-900"
-                        name="password"
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        type="password"
-                        value={password}
-                    />
-                </label>
-                {searchParams.get("error") === "auth" ? (
-                    <p className="text-sm text-red-600">Sign-in failed. Try again.</p>
-                ) : null}
-                {error ? <p className="text-sm text-red-600">{error}</p> : null}
-                <button
-                    className="rounded-md bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-                    disabled={loading}
-                    type="submit">
-                    {loading ? "Signing in…" : "Sign in"}
-                </button>
-            </form>
-            <p className="text-center text-sm text-zinc-600">
-                No account?{" "}
-                <Link className="font-medium text-zinc-900 underline" href="/signup">
-                    Sign up
-                </Link>
-            </p>
-        </main>
-    );
+  return (
+    <main
+      className="relative flex min-h-screen flex-col items-center justify-center px-6 py-12"
+      style={{ background: "var(--mp-canvas)" }}
+    >
+      {/* Radial teal glow behind card */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 50% at 50% -10%, rgba(15,118,110,0.18), transparent)",
+        }}
+      />
+
+      <div className="relative w-full max-w-md">
+        {/* Logo */}
+        <Link className="mb-8 flex items-center justify-center gap-2" href="/">
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white shadow-lg"
+            style={{ background: "linear-gradient(135deg, var(--mp-primary), var(--mp-primary-deep))" }}
+          >
+            M
+          </span>
+          <span className="text-lg font-bold" style={{ color: "var(--mp-text)" }}>
+            MailPilot
+          </span>
+        </Link>
+
+        {/* Card — Emil: scale(0.98)→scale(1) entrance, infrequent so delight is justified */}
+        <motion.div
+          variants={scaleFade}
+          initial="hidden"
+          animate="visible"
+          className="rounded-(--mp-radius-xl) p-8"
+          style={{
+            background: "var(--mp-card)",
+            border: "1px solid var(--mp-border)",
+            boxShadow: "var(--mp-shadow-card)",
+          }}
+        >
+          <h1 className="text-xl font-bold" style={{ color: "var(--mp-text)" }}>
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--mp-text-muted)" }}>
+            Sign in to your MailPilot account.
+          </p>
+
+          <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit}>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="font-medium" style={{ color: "var(--mp-text)" }}>
+                Email
+              </span>
+              <input
+                autoComplete="email"
+                className="rounded-(--mp-radius-md) px-4 py-2.5 text-sm outline-none transition-shadow"
+                style={{
+                  background: "var(--mp-surface)",
+                  border: "1px solid var(--mp-border)",
+                  color: "var(--mp-text)",
+                }}
+                name="email"
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                required
+                type="email"
+                value={email}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--mp-focus)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(20,184,166,0.15)" }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "var(--mp-border)"; e.currentTarget.style.boxShadow = "" }}
+              />
+            </label>
+
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="font-medium" style={{ color: "var(--mp-text)" }}>
+                Password
+              </span>
+              <input
+                autoComplete="current-password"
+                className="rounded-(--mp-radius-md) px-4 py-2.5 text-sm outline-none transition-shadow"
+                style={{
+                  background: "var(--mp-surface)",
+                  border: "1px solid var(--mp-border)",
+                  color: "var(--mp-text)",
+                }}
+                name="password"
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                type="password"
+                value={password}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--mp-focus)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(20,184,166,0.15)" }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "var(--mp-border)"; e.currentTarget.style.boxShadow = "" }}
+              />
+            </label>
+
+            {searchParams.get("error") === "auth" && (
+              <p className="rounded-(--mp-radius-md) px-3 py-2 text-sm" style={{ background: "#fef2f2", color: "#b91c1c" }}>
+                Sign-in failed. Check your credentials and try again.
+              </p>
+            )}
+            {error && (
+              <p className="rounded-(--mp-radius-md) px-3 py-2 text-sm" style={{ background: "#fef2f2", color: "#b91c1c" }}>
+                {error}
+              </p>
+            )}
+
+            <button
+              className="mt-2 rounded-(--mp-radius-md) py-3 text-sm font-semibold text-white transition-[box-shadow,transform] duration-160 active:scale-[0.97] disabled:opacity-50"
+              style={{
+                background: "linear-gradient(135deg, var(--mp-primary), var(--mp-primary-deep))",
+                boxShadow: "0 4px 16px rgba(15,118,110,0.28)",
+              }}
+              disabled={loading}
+              type="submit"
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 6px 24px rgba(15,118,110,0.4)" }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(15,118,110,0.28)" }}
+            >
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm" style={{ color: "var(--mp-text-muted)" }}>
+            No account?{" "}
+            <Link className="font-semibold hover:underline" style={{ color: "var(--mp-primary)" }} href="/signup">
+              Sign up free
+            </Link>
+          </p>
+        </motion.div>
+      </div>
+    </main>
+  )
 }
 
 export default function LoginPage() {
-    return (
-        <Suspense
-            fallback={
-                <main className="mx-auto flex min-h-screen max-w-sm items-center justify-center px-6">
-                    <p className="text-sm text-zinc-500">Loading…</p>
-                </main>
-            }>
-            <LoginForm />
-        </Suspense>
-    );
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center" style={{ background: "var(--mp-canvas)" }}>
+          <p className="text-sm" style={{ color: "var(--mp-text-muted)" }}>Loading…</p>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  )
 }

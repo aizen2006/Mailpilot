@@ -1,41 +1,69 @@
-import { syncUserWithBackend } from "@/app/actions/sync-user";
-import Link from "next/link";
+import { syncUserWithBackend } from "@/app/actions/sync-user"
+import { DashboardNav } from "@/components/dashboard-nav"
+import Link from "next/link"
 
-export const dynamic = "force-dynamic";
-
-const nav = [
-    { href: "/dashboard/overview", label: "Overview" },
-    { href: "/dashboard/usage", label: "Usage" },
-    { href: "/dashboard/spending", label: "Spending" },
-    { href: "/dashboard/billing", label: "Billing" },
-    { href: "/dashboard/settings", label: "Settings" },
-    { href: "/connect/gmail", label: "Connect Gmail" },
-] as const;
+export const dynamic = "force-dynamic"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-    await syncUserWithBackend();
+  await syncUserWithBackend()
 
-    return (
-        <div className="flex min-h-screen">
-            <aside className="w-52 shrink-0 border-r border-zinc-200 bg-zinc-50 px-3 py-6">
-                <Link className="block px-2 text-sm font-semibold text-zinc-900" href="/dashboard/overview">
-                    MailPilot
-                </Link>
-                <nav className="mt-6 flex flex-col gap-1">
-                    {nav.map((item) => (
-                        <Link
-                            key={item.href}
-                            className="rounded-md px-2 py-2 text-sm text-zinc-700 hover:bg-zinc-200/80 hover:text-zinc-900"
-                            href={item.href}>
-                            {item.label}
-                        </Link>
-                    ))}
-                </nav>
-                <Link className="mt-8 block px-2 text-xs text-zinc-500 hover:text-zinc-800" href="/">
-                    Back to home
-                </Link>
-            </aside>
-            <div className="min-w-0 flex-1 bg-white p-8">{children}</div>
+  return (
+    <div className="flex min-h-screen" style={{ background: "var(--mp-canvas)", color: "var(--mp-text)" }}>
+      {/* ── Sidebar ──────────────────────────────────────────────────── */}
+      <aside
+        className="sticky top-0 flex h-screen w-60 shrink-0 flex-col px-4 py-8"
+        style={{
+          background: "var(--mp-card)",
+          borderRight: "1px solid var(--mp-border)",
+          boxShadow: "var(--mp-shadow-card)",
+        }}
+      >
+        {/* Logo */}
+        <Link className="flex items-center gap-3 px-2 mb-2" href="/dashboard/overview">
+          <span
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
+            style={{
+              background: "linear-gradient(135deg, var(--mp-primary), var(--mp-primary-deep))",
+              boxShadow: "0 4px 14px rgba(15, 118, 110, 0.3)",
+            }}
+          >
+            M
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold tracking-tight" style={{ color: "var(--mp-text)" }}>
+              MailPilot
+            </p>
+            <p className="truncate text-xs" style={{ color: "var(--mp-text-soft)" }}>
+              Dashboard
+            </p>
+          </div>
+        </Link>
+
+        {/* Nav */}
+        <DashboardNav />
+
+        {/* Footer */}
+        <div className="mt-auto pt-6" style={{ borderTop: "1px solid var(--mp-border)" }}>
+          <Link
+            className="block rounded-(--mp-radius-md) px-3 py-2 text-xs font-medium transition-colors"
+            style={{ color: "var(--mp-text-muted)" }}
+            href="/"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--mp-surface)"
+              e.currentTarget.style.color = "var(--mp-text)"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = ""
+              e.currentTarget.style.color = "var(--mp-text-muted)"
+            }}
+          >
+            ← Back to home
+          </Link>
         </div>
-    );
+      </aside>
+
+      {/* ── Main ─────────────────────────────────────────────────────── */}
+      <div className="min-w-0 flex-1 overflow-auto p-6 md:p-10">{children}</div>
+    </div>
+  )
 }

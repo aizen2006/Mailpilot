@@ -7,6 +7,7 @@ import { EmptyState } from "~Components/states/EmptyState"
 import { ErrorState } from "~Components/states/ErrorState"
 import { TopBar } from "~Components/topbar/TopBar"
 import { useChat } from "~hooks/useChat"
+import { useSendAudio } from "~hooks/useSendAudio"
 import { useGmailStatus } from "~hooks/useGmailStatus"
 
 type ExtensionChatProps = {
@@ -16,7 +17,11 @@ type ExtensionChatProps = {
 export function ExtensionChat({ userId }: ExtensionChatProps) {
   const userLoading = false
   const gmail = useGmailStatus(userId)
-  const { messages, isSending, error, sendMessage, clearError } = useChat(userId)
+  const { messages, isSending, error, sendMessage, sendAudioBlob, clearError } = useChat(userId)
+  const voice = useSendAudio({
+    sendAudioBlob,
+    disabled: isSending,
+  })
 
   const uiState = userLoading
     ? "loading"
@@ -38,8 +43,14 @@ export function ExtensionChat({ userId }: ExtensionChatProps) {
     <ChatLayout
       composer={
         <SearchBar
-          disabled={isSending || userLoading}
+          disabled={isSending || userLoading || voice.isRecording}
+          micError={voice.micError}
           onSubmit={(text, tone) => void sendMessage(text, tone ?? undefined)}
+          onVoice={{
+            isRecording: voice.isRecording,
+            start: () => void voice.startRecording(),
+            stop: voice.stopRecording,
+          }}
         />
       }
       header={

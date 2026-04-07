@@ -7,12 +7,20 @@ import cn from "~libs/cn"
 const TONES = ["Professional", "Concise", "Quick reply"] as const
 type Tone = (typeof TONES)[number]
 
+export type VoiceControl = {
+  isRecording: boolean
+  start: () => void | Promise<void>
+  stop: () => void
+}
+
 type SearchBarProps = {
   onSubmit: (text: string, tone: Tone | null) => void
   disabled?: boolean
+  onVoice?: VoiceControl
+  micError?: string | null
 }
 
-export function SearchBar({ onSubmit, disabled = false }: SearchBarProps) {
+export function SearchBar({ onSubmit, disabled = false, onVoice, micError }: SearchBarProps) {
   const [text, setText] = useState("")
   const [activeTone, setActiveTone] = useState<Tone | null>(null)
   const sendModifier =
@@ -20,11 +28,13 @@ export function SearchBar({ onSubmit, disabled = false }: SearchBarProps) {
       ? "⌘"
       : "Ctrl"
 
+  const composerLocked = disabled || !!onVoice?.isRecording
+
   const handleGenerate = useCallback(() => {
-    if (!text.trim() || disabled) return
+    if (!text.trim() || composerLocked) return
     onSubmit(text.trim(), activeTone)
     setText("")
-  }, [text, activeTone, disabled, onSubmit])
+  }, [text, activeTone, composerLocked, onSubmit])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -47,7 +57,7 @@ export function SearchBar({ onSubmit, disabled = false }: SearchBarProps) {
 
       <div className="space-y-3">
         <TextArea
-          disabled={disabled}
+          disabled={composerLocked}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Reply to sender, summarize context, or write a follow-up…"
@@ -59,10 +69,11 @@ export function SearchBar({ onSubmit, disabled = false }: SearchBarProps) {
             {TONES.map((tone) => (
               <button
                 key={tone}
+                disabled={composerLocked}
                 onClick={() => setActiveTone((prev) => (prev === tone ? null : tone))}
                 type="button"
                 className={cn(
-                  "inline-flex cursor-pointer items-center rounded-full px-2.5 py-1 text-xs font-medium transition-[transform,background-color,color] duration-100 ease-[var(--ease-out)] active:scale-[0.97]",
+                  "inline-flex cursor-pointer items-center rounded-full px-2.5 py-1 text-xs font-medium transition-[transform,background-color,color] duration-100 ease-[var(--ease-out)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
                   activeTone === tone
                     ? "bg-[var(--color-primary)] text-white"
                     : "bg-[var(--color-bg-muted)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
@@ -71,14 +82,32 @@ export function SearchBar({ onSubmit, disabled = false }: SearchBarProps) {
               </button>
             ))}
           </div>
-          <Button
-            disabled={disabled || !text.trim()}
-            onClick={handleGenerate}
-            size="md"
-            variant="primary">
-            {disabled ? "Generating…" : "Generate"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {onVoice ? (
+              <button
+                aria-label={onVoice.isRecording ? "Stop recording" : "Start voice message"}
+                className={cn(
+                  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-lg transition-[transform,background-color] duration-150 ease-[var(--ease-out)] hover:bg-[var(--color-bg-muted)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50",
+                  onVoice.isRecording && "mic-recording-pulse"
+                )}
+                disabled={disabled && !onVoice.isRecording}
+                onClick={() => (onVoice.isRecording ? onVoice.stop() : void onVoice.start())}
+                type="button">
+                {onVoice.isRecording ? "⏹" : "🎙"}
+              </button>
+            ) : null}
+            <Button
+              disabled={composerLocked || !text.trim()}
+              onClick={handleGenerate}
+              size="md"
+              variant="primary">
+              {disabled ? "Generating…" : "Generate"}
+            </Button>
+          </div>
         </div>
+        {micError ? (
+          <p className="text-xs text-rose-600">{micError}</p>
+        ) : null}
         <p className="text-xs text-[var(--color-text-soft)]">{sendModifier} Enter to send</p>
       </div>
     </div>
