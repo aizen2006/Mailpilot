@@ -39,14 +39,14 @@ export abstract class ChatService {
             }
             // Agent Logic 
             const content = await emailAgent(userId, activeConversationId, userMessage);
-            if (content == null) {
-                throw status(502, "Empty model response");
+            if (typeof content !== "string" || content.trim().length === 0) {
+                throw status(502, "Invalid model response");
             }
             const assistantRows = await db
                 .insert(MessageTable)
                 .values({
                     conversationId: activeConversationId,
-                    content: content as string,
+                    content,
                     role: "assistant",
                 })
                 .returning({ id: MessageTable.id });
@@ -74,8 +74,8 @@ export abstract class ChatService {
     ) {
         try {
             const text = await audioTranslate(audio);
-            if (text == null) {
-                throw status(502, "Failed to translate audio ");
+            if (typeof text !== "string" || text.trim().length === 0) {
+                throw status(502, "Failed to translate audio");
             }
             let activeConversationId = conversationId;
             if (!activeConversationId) {
@@ -95,7 +95,7 @@ export abstract class ChatService {
                 .insert(MessageTable)
                 .values({
                     conversationId: activeConversationId,
-                    content: text as string,
+                    content: text,
                     role: "user",
                 })
                 .returning({ id: MessageTable.id });
@@ -103,12 +103,15 @@ export abstract class ChatService {
                 throw status(400, "Error while creating message");
             }
             // agent logic 
-            const content = await emailAgent(userId, activeConversationId, text as string);
+            const content = await emailAgent(userId, activeConversationId, text);
+            if (typeof content !== "string" || content.trim().length === 0) {
+                throw status(502, "Invalid model response");
+            }
             const assistantRows = await db
                 .insert(MessageTable)
                 .values({
                     conversationId: activeConversationId,
-                    content: content as string,
+                    content,
                     role: "assistant",
                 })
                 .returning({ id: MessageTable.id });

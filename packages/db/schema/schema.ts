@@ -30,7 +30,7 @@ export const UserTable = table("users", {
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     password: varchar("password", { length: 255 }).notNull(),
-    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull().default(""),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

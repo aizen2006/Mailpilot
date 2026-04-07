@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.50",
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run src/index.ts",
     "build": "bun run build src/index.ts"
   },
   "dependencies": {
@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "^2.100.1",
     "corsair": "^0.1.50",
     "db": "workspace:*",
+    "dotenv": "^17.4.1",
     "drizzle-orm": "^0.45.2",
     "elysia": "latest",
     "googleapis": "^171.4.0",

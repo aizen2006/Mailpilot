@@ -1,14 +1,12 @@
 import { Agent , tool, webSearchTool , run } from '@openai/agents';
 import { eq, type InferSelectModel } from "drizzle-orm";
-import { UserTable , MessageTable, UserGmailTokensTable } from "db/schema/schema";
+import { UserTable , MessageTable } from "db/schema/schema";
 import { status } from "elysia";
 import db from "db";
 
 // corsair intiatiation
 import { corsair } from 'db/corsair/client';
 import { OpenAIAgentsProvider } from '@corsair-dev/mcp';
-
-export type Tokens = InferSelectModel<typeof UserGmailTokensTable>;
 
 type HttpError = ReturnType<typeof status>;
 
@@ -17,10 +15,6 @@ function clientError(message: string): HttpError {
 }
 
 type DbResult<T> = { ok: true; data: T } | { ok: false; response: HttpError };
-
-function redactTokenRows(rows: Tokens[]): Omit<Tokens, "accessToken" | "refreshToken">[] {
-    return rows.map(({ accessToken: _a, refreshToken: _r, ...rest }) => rest);
-}
 
 /* 
  * Get the user by id
@@ -60,49 +54,29 @@ async function getConversationsById(
     }
 }
 
-/* 
- * Get the tokens for the user
- * @param userId - The id of the user
- * @returns The tokens for the user
- */
-async function getTokensById(userId: string): Promise<DbResult<Tokens[]>> {
-    try {
-        const rows = await db
-            .select()
-            .from(UserGmailTokensTable)
-            .where(eq(UserGmailTokensTable.userId, userId));
-        if (rows.length === 0) return { ok: false, response: clientError("No tokens found with this user Id") };
-        return { ok: true, data: rows };
-    } catch {
-        return { ok: false, response: clientError("Unable to get the user's tokens") };
-    }
-}
-
-
 export default async function emailAgent(userId: string, conversationId: string , userMessage: string) {
     const provider = new OpenAIAgentsProvider();
     const corsairForUser = corsair.withTenant(userId);
-    const corsair_tools = provider.build({ corsair: corsairForUser, tool: tool as never }) as Awaited<
-        ReturnType<OpenAIAgentsProvider["build"]>
-    >;
+    const builtTools = await provider.build({ corsair: corsairForUser, tool: tool as never });
+    const maybeToolsObject = builtTools as { tools?: unknown };
+    const corsairTools = Array.isArray(builtTools)
+        ? builtTools
+        : Array.isArray(maybeToolsObject?.tools)
+            ? maybeToolsObject.tools
+            : [];
 
     const userResult = await getUserById(userId);
-    if (!userResult.ok) return userResult.response;
+    if (!userResult.ok) throw userResult.response;
 
     const conversationsResult = await getConversationsById(conversationId);
-    if (!conversationsResult.ok) return conversationsResult.response;
-
-    const tokensResult = await getTokensById(userId);
-    if (!tokensResult.ok) return tokensResult.response;
+    if (!conversationsResult.ok) throw conversationsResult.response;
 
     const user = userResult.data;
     const conversations = conversationsResult.data;
-    const tokens = tokensResult.data;
 
     const contextForModel = JSON.stringify({
         user,
         conversations,
-        tokens: redactTokenRows(tokens),
     });
 
     const agent = new Agent({
@@ -122,7 +96,7 @@ export default async function emailAgent(userId: string, conversationId: string 
 
         tools: [
             webSearchTool({ searchContextSize: "medium" }),
-            ...corsair_tools,
+            ...corsairTools,
         ] as ConstructorParameters<typeof Agent>[0]["tools"],
     });
 

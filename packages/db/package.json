@@ -8,7 +8,9 @@
   "private": true,
   "exports": {
     ".": "./index.ts",
-    "./corsair": "./corsair/index.ts"
+    "./corsair": "./corsair/index.ts",
+    "./corsair/client": "./corsair/client.ts",
+    "./schema/schema": "./schema/schema.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -24,7 +26,7 @@
     "@corsair-dev/gmail": "^0.1.0",
     "@supabase/supabase-js": "^2.100.1",
     "corsair": "^0.1.50",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.1",
     "drizzle-orm": "^0.45.2",
     "pg": "^8.20.0",
     "postgres": "^3.4.8"

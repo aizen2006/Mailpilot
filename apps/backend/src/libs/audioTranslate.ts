@@ -13,7 +13,17 @@ export default async function audioTranslate(audio: Buffer){
             file:audio,
             model: "saaras:v2.5"
         });
-        return response as unknown as string;
+        if (typeof response === "string") {
+            return response;
+        }
+        const maybeTranscript =
+            response && typeof response === "object" && "transcript" in response
+                ? (response as { transcript?: unknown }).transcript
+                : null;
+        if (typeof maybeTranscript !== "string" || maybeTranscript.trim().length === 0) {
+            throw status(502, "Invalid transcription response");
+        }
+        return maybeTranscript;
     } catch (error) {
         throw status(500,`Error while translating audio to text: ${error}`);
     }
