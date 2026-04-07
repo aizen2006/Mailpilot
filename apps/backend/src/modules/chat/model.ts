@@ -9,6 +9,7 @@ export const chatSchemas = {
     chat_audio: t.Object({
         userId: t.String(),
         audio: t.File(),
+        conversationId: t.Optional(t.String()),
     }),
     chat_response: t.Object({
         userId: t.String(),

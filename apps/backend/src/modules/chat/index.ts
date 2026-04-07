@@ -18,9 +18,9 @@ const app = new Elysia({ prefix: "/chat" })
     .post(
         "/audio",
         async ({ body }) => {
-            const { userId, audio } = body;
+            const { userId, audio, conversationId } = body;
             const buf = Buffer.from(await audio.arrayBuffer());
-            return ChatService.chat_audio(userId, buf);
+            return ChatService.chat_audio(userId, buf, conversationId ?? null);
         },
         {
             body: chatSchemas.chat_audio,
