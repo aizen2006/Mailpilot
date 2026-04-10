@@ -1,5 +1,6 @@
 "use client"
 
+import { loginRedirectMessage, sanitizeNextPath } from "@/lib/auth-errors"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -10,7 +11,8 @@ import { scaleFade } from "@/lib/motion"
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get("next") ?? "/dashboard/overview"
+  const next = sanitizeNextPath(searchParams.get("next"))
+  const urlError = loginRedirectMessage(searchParams.get("error"), searchParams.get("details"))
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -125,9 +127,9 @@ function LoginForm() {
               />
             </label>
 
-            {searchParams.get("error") === "auth" && (
+            {urlError && (
               <p className="rounded-(--mp-radius-md) px-3 py-2 text-sm" style={{ background: "#fef2f2", color: "#b91c1c" }}>
-                Sign-in failed. Check your credentials and try again.
+                {urlError}
               </p>
             )}
             {error && (

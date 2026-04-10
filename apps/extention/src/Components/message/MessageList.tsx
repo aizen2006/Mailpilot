@@ -25,7 +25,7 @@ export function MessageList({ messages, isSending = false, onSendInstruction }: 
   }, [messages])
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {messages.map((message) => (
         (() => {
           const parsedEmail =

@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { getSiteUrl } from "@/lib/site-url"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -13,25 +14,30 @@ export default function SignupPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setLoading(true)
     const supabase = createClient()
-    const origin = window.location.origin
-    const { error: err } = await supabase.auth.signUp({
+    const callback = `${getSiteUrl()}/auth/callback?next=${encodeURIComponent("/dashboard/overview")}`
+    const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${origin}/auth/callback` },
+      options: { emailRedirectTo: callback },
     })
     setLoading(false)
     if (err) {
       setError(err.message)
       return
     }
-    router.push("/dashboard/overview")
-    router.refresh()
+    if (data.session) {
+      router.push("/dashboard/overview")
+      router.refresh()
+      return
+    }
+    setEmailSent(true)
   }
 
   return (
@@ -79,6 +85,20 @@ export default function SignupPage() {
             Start using AI-powered email in minutes.
           </p>
 
+          {emailSent && (
+            <div
+              className="mt-4 rounded-(--mp-radius-md) px-3 py-2 text-sm"
+              style={{ background: "rgba(20,184,166,0.12)", color: "var(--mp-primary-deep)" }}
+            >
+              <p>Check your inbox for a confirmation link. After you verify, you can sign in.</p>
+              <p className="mt-2 text-center">
+                <Link className="font-semibold underline" style={{ color: "var(--mp-primary)" }} href="/login">
+                  Go to sign in
+                </Link>
+              </p>
+            </div>
+          )}
+
           <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit}>
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="font-medium" style={{ color: "var(--mp-text)" }}>
@@ -93,6 +113,7 @@ export default function SignupPage() {
                   color: "var(--mp-text)",
                 }}
                 name="email"
+                disabled={emailSent}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
@@ -117,6 +138,7 @@ export default function SignupPage() {
                 }}
                 minLength={8}
                 name="password"
+                disabled={emailSent}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 8 characters"
                 required
@@ -139,7 +161,7 @@ export default function SignupPage() {
                 background: "linear-gradient(135deg, var(--mp-primary), var(--mp-primary-deep))",
                 boxShadow: "0 4px 16px rgba(15,118,110,0.28)",
               }}
-              disabled={loading}
+              disabled={loading || emailSent}
               type="submit"
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 6px 24px rgba(15,118,110,0.4)" }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(15,118,110,0.28)" }}

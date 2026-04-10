@@ -47,21 +47,21 @@ export function SearchBar({ onSubmit, disabled = false, onVoice, micError }: Sea
   )
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-[var(--color-text)]">
-          Generate reply
+          Ask MailPilot
         </h2>
-        <Badge variant="tone">Active persona</Badge>
+        <Badge variant="tone">{activeTone ? `${activeTone} tone` : "Neutral tone"}</Badge>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         <TextArea
           disabled={composerLocked}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Reply to sender, summarize context, or write a follow-up…"
-          rows={3}
+          placeholder="Summarize this thread, draft a reply, or ask for next steps…"
+          rows={4}
           value={text}
         />
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -83,6 +83,13 @@ export function SearchBar({ onSubmit, disabled = false, onVoice, micError }: Sea
             ))}
           </div>
           <div className="flex items-center gap-2">
+            <button
+              aria-label="Attach files"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-base transition-[transform,background-color] duration-150 ease-[var(--ease-out)] hover:bg-[var(--color-bg-muted)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50"
+              disabled={composerLocked}
+              type="button">
+              +
+            </button>
             {onVoice ? (
               <button
                 aria-label={onVoice.isRecording ? "Stop recording" : "Start voice message"}
@@ -101,14 +108,17 @@ export function SearchBar({ onSubmit, disabled = false, onVoice, micError }: Sea
               onClick={handleGenerate}
               size="md"
               variant="primary">
-              {disabled ? "Generating…" : "Generate"}
+              {disabled ? "Sending…" : "Send"}
             </Button>
           </div>
+        </div>
+        <div className="flex items-center justify-between gap-2 text-xs text-[var(--color-text-soft)]">
+          <p>{sendModifier} Enter to send</p>
+          <p>Modes: Attach file, Thinking, Better model</p>
         </div>
         {micError ? (
           <p className="text-xs text-rose-600">{micError}</p>
         ) : null}
-        <p className="text-xs text-[var(--color-text-soft)]">{sendModifier} Enter to send</p>
       </div>
     </div>
   )

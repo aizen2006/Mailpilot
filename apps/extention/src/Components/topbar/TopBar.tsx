@@ -27,6 +27,15 @@ function IconClose(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+function IconUser(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden {...props}>
+      <circle cx="12" cy="8" r="3.25" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 19a7 7 0 0 1 14 0" />
+    </svg>
+  )
+}
+
 type TopBarProps = {
   gmailConnected?: boolean
   gmailEmail?: string
@@ -51,34 +60,48 @@ export function TopBar({
       : "Gmail not connected"
 
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0 space-y-1">
-        <h1 className="text-lg font-semibold tracking-tight text-[var(--color-text)] sm:text-xl">
-          MailPilot
-        </h1>
-        <div className="flex min-w-0 items-center gap-2">
-          <Badge className="max-w-full truncate" title={badgeLabel} variant="status">
-            {badgeLabel}
-          </Badge>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <h1 className="text-lg font-semibold tracking-tight text-[var(--color-text)] sm:text-xl">
+            MailPilot
+          </h1>
+          <div className="flex min-w-0 items-center gap-2">
+            <Badge className="max-w-full truncate" title={badgeLabel} variant="status">
+              {badgeLabel}
+            </Badge>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <Button aria-label="Profile" size="sm" variant="ghost">
+            <IconUser className="h-4 w-4 text-[var(--color-text-muted)]" />
+          </Button>
+          <Button
+            aria-label="Settings"
+            onClick={onSettings}
+            size="sm"
+            variant="ghost">
+            <IconGear className="h-4 w-4 text-[var(--color-text-muted)]" />
+          </Button>
+          <Button
+            aria-label="Close"
+            onClick={onClose}
+            size="sm"
+            variant="ghost">
+            <IconClose className="h-4 w-4 text-[var(--color-text-muted)]" />
+          </Button>
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
-        <Button
-          aria-label="Settings"
-          onClick={onSettings}
-          size="sm"
-          variant="ghost">
-          <IconGear className="h-4 w-4 text-[var(--color-text-muted)]" />
-        </Button>
-        <Button
-          aria-label="Close"
-          onClick={onClose}
-          size="sm"
-          variant="ghost">
-          <IconClose className="h-4 w-4 text-[var(--color-text-muted)]" />
-        </Button>
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <Badge variant="tone">History</Badge>
+        <Badge variant="tone">Agent mode</Badge>
+        <Badge variant="tone">Connections</Badge>
       </div>
+      <p className="text-xs text-[var(--color-text-soft)]">
+        Connect Gmail, Calendar, Slack and more.
+      </p>
     </div>
   )
 }
