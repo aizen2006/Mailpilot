@@ -45,17 +45,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* Footer */}
         <div className="mt-auto pt-6" style={{ borderTop: "1px solid var(--mp-border)" }}>
           <Link
-            className="block rounded-(--mp-radius-md) px-3 py-2 text-xs font-medium transition-colors"
-            style={{ color: "var(--mp-text-muted)" }}
+            className="block rounded-(--mp-radius-md) px-3 py-2 text-xs font-medium text-[var(--mp-text-muted)] transition-colors hover:bg-[var(--mp-surface)] hover:text-[var(--mp-text)]"
             href="/"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--mp-surface)"
-              e.currentTarget.style.color = "var(--mp-text)"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = ""
-              e.currentTarget.style.color = "var(--mp-text-muted)"
-            }}
           >
             ← Back to home
           </Link>
